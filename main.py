@@ -24,7 +24,7 @@ app = FastAPI(title="九型人格demo", description="demo接口文档", version=
 @app.post("/api/v1/commit",
           description='''提交测试结果,res为测试结果,
           例如：res = [1,2,3,...9] -> 代表一类得分为1，二类得分为2，三类得分为3，
-          ...，九类得分为9, 接口返回分类 用于确保数据保存成功 若为 type==-1 代表没有类别''',
+          ...，九类得分为9, 接口返回分类 用于确保数据保存成功 ''',
           response_model=schemas.CommitCreate,
           tags=["学生"],
           )
@@ -88,12 +88,6 @@ def delete_commit(id: int, db: Session = Depends(get_db), token: str = Depends(o
     if verify_access_token(token, db):
         crud.delete_commit_by_id(db, id)
         return {"msg": "id" + str(id) + ": 删除成功"}
-    # else:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Invalid authentication credentials",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
 
 
 @app.get("/api/v1/queryById",
