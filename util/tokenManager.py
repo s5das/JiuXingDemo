@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 import crud
-from myModels.requestModels import TokenData
+from RestModels.requestModels import TokenData
 from util.dbCreator import get_db
 from util.passwordManager import verify_password
 

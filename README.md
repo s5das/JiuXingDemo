@@ -1,7 +1,8 @@
 ## 九型人格后端demo
 
 > [需求文档](https://otkyd4jmkr.feishu.cn/docx/doxcn5tlhyN0pwtLfqG0e13mgyb)
-
+>
+> [接口文档](https://www.eolink.com/share/index?shareCode=t31uxi)
 ### overview
 
 1. 使用fastapi框架快速开发， 数据库使用sqlite
@@ -29,7 +30,7 @@ curl --location --request GET 'localhost:8000/api/v1/query' \
 ### lanch
 
 1. pip install -r requirements.txt
-2. uvicorn main:app.py
+2. bash run.sh
 
 ## deployment
 

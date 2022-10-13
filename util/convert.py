@@ -41,3 +41,9 @@ def convert_db_commit_to_CommitInExcel(db_commit: models.Commit):
     tmp_dict = db_commit.__dict__
     tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
     return schemas.CommitInExcel(**tmp_dict)
+
+
+def convert_db_commit_to_CommitResponse(db_commit: models.Commit):
+    tmp_dict = db_commit.__dict__
+    tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
+    return schemas.CommitResponse(**tmp_dict)
