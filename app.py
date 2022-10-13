@@ -20,8 +20,9 @@ from util.tokenManager import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from util.tokenManager import authenticate_user, verify_access_token
 from util.tokenManager import oauth2_scheme
 
-app = FastAPI(title="九型人格demo", description="demo接口文档, 异常以400返回", version="1.0.0")
-
+app = FastAPI(title="九型人格demo", description="demo接口文档, 异常以400返回", version="1.0.0",
+              doc_url=None, redoc_url=None, openapi_url=None)
+# app = FastAPI(title="九型人格demo", description="demo接口文档, 异常以400返回", version="1.0.0")
 
 @app.post("/api/v1/commit",
           description='''提交测试结果,res为测试结果,
