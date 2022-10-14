@@ -40,6 +40,6 @@ curl --location --request GET 'localhost:8000/api/v1/query' \
 
 ### TODO
 
-1. 添加日志功能
-2. 使用拦截器实现鉴权(目前是if判断)
-3. jwt过期时间是否生效？
+1. [x] 添加日志功能
+2. [x] 使用拦截器实现鉴权(目前是if判断)
+3. [x] jwt过期时间是否生效 (目前是生效的)

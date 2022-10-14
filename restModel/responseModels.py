@@ -23,8 +23,3 @@ class CommitInRes(BaseModel):
     res: List[int]
 
 
-class Commits(BaseModel):
-    res = List[CommitInRes]
-
-    class Config:
-        arbitrary_types_allowed = True

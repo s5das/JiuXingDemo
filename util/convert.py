@@ -5,7 +5,7 @@ import models
 import schemas
 from database import engine
 from util.timeUtil import get_current_beijing_time
-
+from restModel.responseModels import CommitInRes
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -46,4 +46,4 @@ def convert_db_commit_to_CommitInExcel(db_commit: models.Commit):
 def convert_db_commit_to_CommitResponse(db_commit: models.Commit):
     tmp_dict = db_commit.__dict__
     tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
-    return schemas.CommitResponse(**tmp_dict)
+    return CommitInRes(**tmp_dict)

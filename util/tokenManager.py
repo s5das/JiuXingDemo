@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 import crud
-from RestModels.requestModels import TokenData
+from restModel.requestModels import TokenData
 from util.dbCreator import get_db
 from util.passwordManager import verify_password
 
@@ -42,7 +42,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-def verify_access_token(token: str, db: Session):
+def verify_access_token(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
