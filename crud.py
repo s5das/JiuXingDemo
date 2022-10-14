@@ -12,7 +12,7 @@ def create_user(db: Session, user: schemas.User):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user.__dict__
+    return db_user
 
 
 def get_user_by_name(db: Session, name: str):
@@ -34,6 +34,7 @@ def get_commit_by_stu_id(db: Session, stu_id: str):
 
 
 def delete_commit_by_id(db: Session, commit_id: int):
+
     db.query(models.Commit).filter(models.Commit.id == commit_id).delete()
     db.commit()
 
@@ -44,4 +45,4 @@ def create_commit(db: Session, commit: schemas.Commit):
     db.add(db_commit)
     db.commit()
     db.refresh(db_commit)
-    return db_commit.__dict__
+    return db_commit

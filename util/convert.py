@@ -4,8 +4,9 @@ from typing import List
 import models
 import schemas
 from database import engine
-from util.timeUtil import get_current_beijing_time
 from restModel.responseModels import CommitInRes
+from util.timeUtil import get_current_beijing_time
+
 models.Base.metadata.create_all(bind=engine)
 
 

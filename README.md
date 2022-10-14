@@ -42,4 +42,5 @@ curl --location --request GET 'localhost:8000/api/v1/query' \
 
 1. [x] 添加日志功能
 2. [x] 使用拦截器实现鉴权(目前是if判断)
-3. [x] jwt过期时间是否生效 (目前是生效的)
+3. [x] jwt过期时间是否生效 (jose库默认过期verify)
+4. [x] status code added 
