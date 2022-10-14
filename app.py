@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from io import BytesIO
 from typing import List
@@ -19,18 +20,20 @@ from util.restutil import exceptWrapper
 from util.tokenManager import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from util.tokenManager import authenticate_user, verify_access_token
 
-app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0",
-              doc_url=None, redoc_url=None, openapi_url=None)
+if os.getenv("ENV") == "dev":
+    app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0")
+else:
+    app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0", openapi_url=None)
 
 
-# app = FastAPI(title="九型人格demo", description="demo接口文档, 异常以400返回", version="1.0.0")
+#
 
 
 @app.post("/api/v1/commit",
           description='''提交测试结果,res为测试结果,
           例如：res = [1,2,3,...9] -> 代表一类得分为1，二类得分为2，三类得分为3，
           ...，九类得分为9, 接口返回分类 用于确定数据保存成功''',
-          # response_model=restModel.responseModels.CommitInRes,
+          response_model=restModel.responseModels.CommitInRes,
           responses={400: {"description": "学号已存在 | 测试结果不能全为0 | 分类数组长度不为9",
                            "model": restModel.responseModels.Message},
                      500: {"description": "服务器错误", "model": restModel.responseModels.Message}

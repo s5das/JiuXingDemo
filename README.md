@@ -25,7 +25,6 @@ curl --location --request GET 'localhost:8000/api/v1/query' \
 --data-raw ''
 ```
 
-4. api参考 assert目录下.json文件 [swagger editor](https://editor.swagger.io/)
 
 ### lanch
 
