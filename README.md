@@ -2,7 +2,7 @@
 
 > [需求文档](https://otkyd4jmkr.feishu.cn/docx/doxcn5tlhyN0pwtLfqG0e13mgyb)
 >
-> [接口文档](https://www.eolink.com/share/index?shareCode=t31uxi)
+> [接口文档](https://www.apifox.cn/apidoc/shared-a0d734ca-87c1-4e6c-9e6d-27f1b124da23)
 ### overview
 
 1. 使用fastapi框架快速开发， 数据库使用sqlite
