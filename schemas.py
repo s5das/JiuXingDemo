@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, validator
 
 
 class Commit(BaseModel):
@@ -9,6 +9,30 @@ class Commit(BaseModel):
     major: str
     instructor: str
     res: List[int]
+
+    @validator('stu_id')
+    def stu_id_must_be_12_digits(cls, v):
+        if len(v) != 12:
+            raise ValueError('stu_id must be 12 digits')
+        return v
+
+    @validator('name', 'instructor')
+    def name_must_be_2_to_10_chars(cls, v):
+        if len(v) < 2 or len(v) > 10:
+            raise ValueError('name must be 2 to 10 chars')
+        return v
+
+    @validator('major')
+    def major_must_be_2_to_20_chars(cls, v):
+        if len(v) < 2 or len(v) > 20:
+            raise ValueError('major must be 2 to 20 chars')
+        return v
+
+    @validator('res')
+    def res_must_be_9_ints(cls, v):
+        if len(v) != 9:
+            raise ValueError('res must be 9 ints')
+        return v
 
 
 class CommitCreate(BaseModel):
@@ -30,11 +54,6 @@ class CommitInExcel(BaseModel):
     major: str
     instructor: str
     res: List[int]
-
-
-class CommitResponse(Commit):
-    class Config:
-        orm_mode = True
 
 
 class User(BaseModel):

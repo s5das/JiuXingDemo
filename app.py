@@ -19,11 +19,19 @@ from util.dbCreator import get_db
 from util.restutil import exceptWrapper
 from util.tokenManager import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from util.tokenManager import authenticate_user, verify_access_token
+from fastapi import Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
+limiter = Limiter(key_func=get_remote_address)
 if os.getenv("ENV") == "dev":
     app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0")
 else:
     app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0", openapi_url=None)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 #
@@ -40,14 +48,13 @@ else:
                      },
           tags=["学生"]
           )
-def add_commit(commit: schemas.Commit, db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def add_commit(request: Request, commit: schemas.Commit, db: Session = Depends(get_db)):
     db_commit = crud.get_commit_by_stu_id(db, commit.stu_id)
     if db_commit:
         raise HTTPException(status_code=400, detail="学号已存在")
     if max(commit.res) == 0:
         raise HTTPException(status_code=400, detail="测试结果不能全为0")
-    if len(commit.res) != 9:
-        raise HTTPException(status_code=400, detail="测试结果长度不为9")
     try:
         return convert_db_commit_to_CommitResponse(crud.create_commit(db, commit))
     except Exception as e:
@@ -81,7 +88,9 @@ def add_user(user: schemas.User, db: Session = Depends(get_db)):
           },
           response_model=Token,
           tags=["书院"])
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(),
+                           db: Session = Depends(get_db)):
     db_usr = authenticate_user(form_data.username, form_data.password, db)
     if not db_usr:
         raise login_exception
