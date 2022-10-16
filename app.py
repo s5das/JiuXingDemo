@@ -143,17 +143,20 @@ def get_commits(db: Session = Depends(get_db)):
     tags=["书院"])
 def get_commits_by_page(page: int, page_size: int = 10, db: Session = Depends(get_db)):
     res_list = crud.get_commits_by_page(db, page, page_size)
+    res_list[-1] = convert_templete(res_list[-1], convert_db_commit_to_CommitResponse)
     key = ["total", "data"]
+    # res =  dict(zip(key, res_list))
+    # print (res)
     return dict(zip(key, res_list))
 
 
 # Union["学号", "姓名", "辅导员", "大类"]
 @app.get("/api/v1/queryByFilter",
          description="传入筛选条件，返回符合条件的数据",
-         response_model=restModel.responseModels.PageResponse,
+         # response_model=restModel.responseModels.PageResponse,
          dependencies=[Depends(verify_access_token)],
          tags=["书院"])
-def get_commits_by_filter(arg: Union[int, str],
+def get_commits_by_filter(arg: Union[str],
                           page: int,
                           filter_type: str = Query(regex="学号|姓名|辅导员|大类"),
                           db: Session = Depends(get_db)):
@@ -163,10 +166,14 @@ def get_commits_by_filter(arg: Union[int, str],
     elif filter_type == "姓名":
         res_list = crud.query_commits_by_name(db, arg, page)
     elif filter_type == "辅导员":
-        res_list = crud.query_commits_by_instruction(db, arg, page)
+        res_list = crud.query_commits_by_instructor(db, arg, page)
     else:
         res_list = crud.query_commits_by_major(db, arg, page)
     # try:
+    # res_list = convert_db_commit_to_CommitResponse(res_list)
+    print(type(res_list[-1][-1]))
+    # print (res_list[-1] )
+    # res_list[-1] = convert_templete(res_list[-1], convert_db_commit_to_CommitResponse)
     key = ["total", "data"]
     return dict(zip(key, res_list))
 
