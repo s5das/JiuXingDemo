@@ -4,9 +4,13 @@ from io import BytesIO
 from typing import List, Union
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Request, Query
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from openpyxl import Workbook
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 import crud
@@ -16,13 +20,8 @@ from restModel.responseModels import Token, login_exception
 from util.convert import convert_templete, \
     convert_db_commit_to_CommitResponse
 from util.dbCreator import get_db
-from util.restutil import exceptWrapper
 from util.tokenManager import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from util.tokenManager import authenticate_user, verify_access_token
-from fastapi import Request, Query
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 limiter = Limiter(key_func=get_remote_address)
 if os.getenv("ENV") == "dev":
@@ -44,7 +43,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
           response_model=restModel.responseModels.CommitInRes,
           responses={400: {"description": "学号已存在 | 测试结果不能全为0 | 分类数组长度不为9",
                            "model": restModel.responseModels.Message},
-                     500: {"description": "服务器错误", "model": restModel.responseModels.Message}
+                     # 500: {"description": "服务器错误", "model": restModel.responseModels.Message}
                      },
           tags=["学生"]
           )
@@ -57,10 +56,7 @@ def add_commit(request: Request, commit: schemas.Commit, db: Session = Depends(g
         raise HTTPException(status_code=400, detail="学号已存在")
     if max(commit.res) == 0:
         raise HTTPException(status_code=400, detail="测试结果不能全为0")
-    try:
-        return convert_db_commit_to_CommitResponse(crud.create_commit(db, commit))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="服务器错误")
+    return convert_db_commit_to_CommitResponse(crud.create_commit(db, commit))
 
 
 @app.post("/api/v1/addUser",
@@ -69,7 +65,7 @@ def add_commit(request: Request, commit: schemas.Commit, db: Session = Depends(g
           responses={
               400: {"description": "操作失败", "model": restModel.responseModels.Message},
               401: {"description": "用户名已存在", "model": restModel.responseModels.Message},
-              500: {"description": "服务器错误", "model": restModel.responseModels.Message},
+              # 500: {"description": "服务器错误", "model": restModel.responseModels.Message},
           },
 
           tags=["dev"]
@@ -78,7 +74,8 @@ def add_user(user: schemas.User, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_name(db, user.name)
     if db_user:
         raise HTTPException(status_code=400, detail="用户名已存在")
-    exceptWrapper(crud.create_user, [db, user], "创建失败")
+    # exceptWrapper(crud.create_user, [db, user], "创建失败")
+    crud.create_user(db, user)
     return {"detail": "创建成功"}
 
 
@@ -108,13 +105,14 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
          response_model=List[restModel.responseModels.CommitInRes],
          responses={
              401: {"description": "token错误", "model": restModel.responseModels.Message},
-             500: {"description": "服务器错误", "model": restModel.responseModels.Message},
+             # 500: {"description": "服务器错误", "model": restModel.responseModels.Message},
          },
          dependencies=[Depends(verify_access_token)],
          tags=["书院"])
 def get_commits(db: Session = Depends(get_db)):
     res_list = crud.get_commits(db)
-    return exceptWrapper(convert_templete, [res_list, convert_db_commit_to_CommitResponse], "查询失败")
+    # return exceptWrapper(convert_templete, [res_list, convert_db_commit_to_CommitResponse], "查询失败")
+    return convert_templete(res_list, convert_db_commit_to_CommitResponse)
 
 
 @app.get(
@@ -150,8 +148,6 @@ def get_commits_by_filter(arg: Union[int, str],
         res_list = crud.query_commits_by_major(db, arg, page)
     # try:
     key = ["total", "data"]
-    # res = dict(zip(key, res_list))
-    # print(res)
     return dict(zip(key, res_list))
 
 
@@ -189,7 +185,8 @@ def delete_commit(id: int, db: Session = Depends(get_db)):
 def get_commit_by_id(id: int, db: Session = Depends(get_db)):
     if not crud.get_commit_by_id(db, id):
         raise HTTPException(status_code=400, detail="id不存在")
-    return exceptWrapper(convert_db_commit_to_CommitResponse, [crud.get_commit_by_id(db, id)], "查询失败")
+    # return exceptWrapper(convert_db_commit_to_CommitResponse, [crud.get_commit_by_id(db, id)], "查询失败")
+    return convert_db_commit_to_CommitResponse(crud.get_commit_by_id(db, id))
 
 
 @app.get("/api/v1/getExcel",
