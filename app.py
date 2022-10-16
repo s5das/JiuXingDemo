@@ -12,6 +12,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
+from starlette.middleware.cors import CORSMiddleware
 
 import crud
 import restModel
@@ -30,7 +31,6 @@ if os.getenv("ENV") == "dev":
 else:
     app = FastAPI(title="九型人格demo", description="demo接口文档", version="1.0.0", openapi_url=None)
 
-
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -43,6 +43,17 @@ if os.getenv("MAIL_NAME"):
     mailSender = MailSender(mail_name, mail_password, mail_host, mail_port, receiver)
     mailSender.create_task()
 
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/api/v1/commit",
