@@ -1,3 +1,6 @@
+# from util.scheduleTask import MailSender
+import os
+import sys
 import threading
 
 import yagmail
@@ -23,6 +26,20 @@ class MailSender:
     def create_task(self):
         subject = "日志"
         with open("logfile.log", "r") as f:
-            content = f.readlines()[-10:]
+            content = f.readlines()[-5:]
         t = threading.Timer(1, self.sendAsync, [self.receiver, subject, content])
         t.start()
+
+
+sys.path.append("../..")
+
+if os.getenv("MAIL_NAME"):
+    mail_name = os.getenv("MAIL_NAME")
+    mail_password = os.getenv("MAIL_PASSWORD")
+    mail_host = os.getenv("MAIL_HOST")
+    mail_port = os.getenv("MAIL_PORT")
+    receiver = os.getenv("MAIL_RECEIVER")
+    mailSender = MailSender(mail_name, mail_password, mail_host, mail_port, receiver)
+    mailSender.create_task()
+
+    mailSender.sendAsync(mailSender.receiver, "test", "test")
