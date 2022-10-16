@@ -169,11 +169,12 @@ def get_commits_by_filter(arg: Union[str],
         res_list = crud.query_commits_by_instructor(db, arg, page)
     else:
         res_list = crud.query_commits_by_major(db, arg, page)
-    # try:
-    # res_list = convert_db_commit_to_CommitResponse(res_list)
-    print(type(res_list[-1][-1]))
-    # print (res_list[-1] )
-    # res_list[-1] = convert_templete(res_list[-1], convert_db_commit_to_CommitResponse)
+
+    for i in range(len(res_list[-1])):
+        res_list[-1][i] = res_list[-1][i]._asdict()
+
+    res_list[-1] = convert_templete(res_list[-1], convert_db_commit_to_CommitResponse)
+
     key = ["total", "data"]
     return dict(zip(key, res_list))
 

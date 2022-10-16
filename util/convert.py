@@ -7,7 +7,6 @@ from database import engine
 from restModel.responseModels import CommitInRes
 from util.timeUtil import get_current_beijing_time
 
-
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -46,7 +45,10 @@ def convert_db_commit_to_CommitInExcel(db_commit: models.Commit):
 
 
 def convert_db_commit_to_CommitResponse(db_commit: models.Commit):
-    tmp_dict = db_commit.__dict__
+    if type(db_commit) == dict:
+        tmp_dict = db_commit
+    else:
+        tmp_dict = db_commit.__dict__
     tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
     return CommitInRes(**tmp_dict)
 
