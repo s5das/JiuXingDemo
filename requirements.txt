@@ -28,3 +28,5 @@ starlette==0.20.4
 typing_extensions==4.4.0
 uvicorn==0.18.3
 wincertstore==0.2
+
+yagmail~=0.15.293
