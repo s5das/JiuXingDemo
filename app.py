@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 from io import BytesIO
-from typing import List
+from typing import List, Union
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
@@ -19,7 +19,7 @@ from util.dbCreator import get_db
 from util.restutil import exceptWrapper
 from util.tokenManager import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from util.tokenManager import authenticate_user, verify_access_token
-from fastapi import Request
+from fastapi import Request, Query
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -48,7 +48,9 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
                      },
           tags=["学生"]
           )
-@limiter.limit("100/minute")
+# @limiter.limit("100/minute")
+@limiter.limit("1000/hour")
+@limiter.limit("5000/day")
 def add_commit(request: Request, commit: schemas.Commit, db: Session = Depends(get_db)):
     db_commit = crud.get_commit_by_stu_id(db, commit.stu_id)
     if db_commit:
@@ -88,7 +90,7 @@ def add_user(user: schemas.User, db: Session = Depends(get_db)):
           },
           response_model=Token,
           tags=["书院"])
-@limiter.limit("100/minute")
+@limiter.limit("20/minute")
 def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(),
                            db: Session = Depends(get_db)):
     db_usr = authenticate_user(form_data.username, form_data.password, db)
@@ -101,8 +103,8 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/api/v1/query",
-         description="查询接口，返回指定长度的提交的数据, 如果长度小于limit则返回全部",
+@app.get("/api/v1/queryAll",
+         description="获取全部的提交结果",
          response_model=List[restModel.responseModels.CommitInRes],
          responses={
              401: {"description": "token错误", "model": restModel.responseModels.Message},
@@ -110,12 +112,51 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
          },
          dependencies=[Depends(verify_access_token)],
          tags=["书院"])
-def get_commits(limit: int = 50, db: Session = Depends(get_db)):
-    res_list = crud.get_commits(db, limit=limit)
+def get_commits(db: Session = Depends(get_db)):
+    res_list = crud.get_commits(db)
     return exceptWrapper(convert_templete, [res_list, convert_db_commit_to_CommitResponse], "查询失败")
 
 
+@app.get(
+    "/api/v1/queryByPage",
+    description="传入页码和每页长度(默认为10)，返回指定页码的数据, 数据长度需要自行判断",
+    response_model=restModel.responseModels.PageResponse,
+    dependencies=[Depends(verify_access_token)],
+    tags=["书院"])
+def get_commits_by_page(page: int, page_size: int = 10, db: Session = Depends(get_db)):
+    res_list = crud.get_commits_by_page(db, page, page_size)
+    key = ["total", "data"]
+    return dict(zip(key, res_list))
+
+
+# Union["学号", "姓名", "辅导员", "大类"]
+@app.get("/api/v1/queryByFilter",
+         description="传入筛选条件，返回符合条件的数据",
+         response_model=restModel.responseModels.PageResponse,
+         dependencies=[Depends(verify_access_token)],
+         tags=["书院"])
+def get_commits_by_filter(arg: Union[int, str],
+                          page: int,
+                          filter_type: str = Query(regex="学号|姓名|辅导员|大类"),
+                          db: Session = Depends(get_db)):
+    # try:
+    if filter_type == "学号":
+        res_list = crud.query_commits_by_stu_id(db, arg, page)
+    elif filter_type == "姓名":
+        res_list = crud.query_commits_by_name(db, arg, page)
+    elif filter_type == "辅导员":
+        res_list = crud.query_commits_by_instruction(db, arg, page)
+    else:
+        res_list = crud.query_commits_by_major(db, arg, page)
+    # try:
+    key = ["total", "data"]
+    # res = dict(zip(key, res_list))
+    # print(res)
+    return dict(zip(key, res_list))
+
+
 @app.delete("/api/v1/deleteById",
+
             description="删除指定id的提交",
             response_model=restModel.responseModels.Message,
             responses={
@@ -148,7 +189,6 @@ def delete_commit(id: int, db: Session = Depends(get_db)):
 def get_commit_by_id(id: int, db: Session = Depends(get_db)):
     if not crud.get_commit_by_id(db, id):
         raise HTTPException(status_code=400, detail="id不存在")
-        # raise HTTPException(status_code=400, detail="id不存在")
     return exceptWrapper(convert_db_commit_to_CommitResponse, [crud.get_commit_by_id(db, id)], "查询失败")
 
 
@@ -179,7 +219,7 @@ def get_docs(db: Session = Depends(get_db)):
         item.extend(list(map(int, commit['res'].split(','))))
         return item
 
-    res_in_db = crud.get_commits(db, flag=True)
+    res_in_db = crud.get_commits(db)
     for index, idx in enumerate(range(len(res_in_db)), 1):
         res_in_db[idx].id = index
 

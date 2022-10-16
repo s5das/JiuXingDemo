@@ -7,6 +7,7 @@ from database import engine
 from restModel.responseModels import CommitInRes
 from util.timeUtil import get_current_beijing_time
 
+
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -48,3 +49,8 @@ def convert_db_commit_to_CommitResponse(db_commit: models.Commit):
     tmp_dict = db_commit.__dict__
     tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
     return CommitInRes(**tmp_dict)
+
+
+# def convert_data_to_page(db: Session, data: List, current_page_index: int, page_size: int):
+#     # return data[(current_page_index - 1) * page_size:current_page_index * page_size]
+#     pages_cnt = crud.get_pages_cnt(db)
