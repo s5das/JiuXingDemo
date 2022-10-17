@@ -139,9 +139,10 @@ def get_commits(db: Session = Depends(get_db)):
     "/api/v1/queryByPage",
     description="传入页码和每页长度(默认为10)，返回指定页码的数据, 数据长度需要自行判断",
     response_model=restModel.responseModels.PageResponse,
+    # response_model_exclude=
     dependencies=[Depends(verify_access_token)],
     tags=["书院"])
-def get_commits_by_page(page: int, page_size: int = 10, db: Session = Depends(get_db)):
+def get_commits_by_page(page: int = Query(gt=1, default=1), page_size: int = 10, db: Session = Depends(get_db)):
     res_list = crud.get_commits_by_page(db, page, page_size)
     res_list[-1] = convert_templete(res_list[-1], convert_db_commit_to_CommitResponse)
     key = ["total", "data"]
@@ -157,7 +158,7 @@ def get_commits_by_page(page: int, page_size: int = 10, db: Session = Depends(ge
          dependencies=[Depends(verify_access_token)],
          tags=["书院"])
 def get_commits_by_filter(arg: Union[str],
-                          page: int,
+                          page: int = Query(gt=1, default=1),
                           filter_type: str = Query(regex="学号|姓名|辅导员|大类"),
                           db: Session = Depends(get_db)):
     # try:
