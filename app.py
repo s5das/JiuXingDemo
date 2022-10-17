@@ -107,7 +107,7 @@ def add_user(user: schemas.User, db: Session = Depends(get_db)):
           },
           response_model=Token,
           tags=["书院"])
-@limiter.limit("20/minute")
+@limiter.limit("30/minute")
 def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(),
                            db: Session = Depends(get_db)):
     db_usr = authenticate_user(form_data.username, form_data.password, db)
