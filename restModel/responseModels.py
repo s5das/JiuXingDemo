@@ -41,9 +41,8 @@ class CommitInRes(BaseModel):
     major: str
     instructor: str
     res: List[int]
-
+    detail_res:str
 
 class PageResponse(BaseModel):
     total: int
     data: List[CommitInRes]
-    # daata : List[str]

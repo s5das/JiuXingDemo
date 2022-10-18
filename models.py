@@ -23,3 +23,4 @@ class Commit(Base):
     major = Column(String)
     instructor = Column(String)
     res = Column(String)
+    detail_res = Column(String)

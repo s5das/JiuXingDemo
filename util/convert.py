@@ -50,6 +50,7 @@ def convert_db_commit_to_CommitResponse(db_commit: models.Commit):
     else:
         tmp_dict = db_commit.__dict__
     tmp_dict['res'] = convert_str_to_list(tmp_dict['res'])
+    # print (str(tmp_dict))
     return CommitInRes(**tmp_dict)
 
 

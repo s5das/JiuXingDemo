@@ -76,7 +76,8 @@ def add_commit(request: Request, commit: schemas.Commit, db: Session = Depends(g
         raise HTTPException(status_code=400, detail="学号已存在")
     if max(commit.res) == 0:
         raise HTTPException(status_code=400, detail="测试结果不能全为0")
-    return convert_db_commit_to_CommitResponse(crud.create_commit(db, commit))
+    res1 = crud.create_commit(db, commit)
+    return convert_db_commit_to_CommitResponse(res1)
 
 
 @app.post("/api/v1/addUser",
