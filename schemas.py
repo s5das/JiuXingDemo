@@ -9,6 +9,8 @@ class Commit(BaseModel):
     major: str
     instructor: str
     res: List[int]
+    detail_res:str
+
 
     @validator('stu_id')
     def stu_id_must_be_11_digits(cls, v):
@@ -44,6 +46,7 @@ class CommitCreate(BaseModel):
     major: str
     instructor: str
     res: str
+    detail_res:str
 
 
 class CommitInExcel(BaseModel):
